@@ -14,5 +14,5 @@ delete /todos/{id} <br />
 
 ### Requirements
 
-- configure your AWS profile by editiing config and credentials by navigating to `cd ~/.aws`
+- configure your AWS profile ie add secret and access key by editiing config and credentials by navigating to `cd ~/.aws`
 - install serverless cli globally `npm i -g serverless`
