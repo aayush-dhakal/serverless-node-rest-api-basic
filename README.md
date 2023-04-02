@@ -2,8 +2,8 @@
 
 ### Routes:
 
-post /todos
-get /todos
-get /todos/{id}
-update /todos/{id}
-delete /todos/{id}
+post /todos <br />
+get /todos <br />
+get /todos/{id} <br />
+update /todos/{id} <br />
+delete /todos/{id} <br />
