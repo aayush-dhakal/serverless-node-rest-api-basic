@@ -1,0 +1,86 @@
+service: serverless-todos-rest-api
+
+frameworkVersion: "3"
+
+# this is for 28 ie for defining custom variables
+custom:
+  settings:
+    TODOS_TABLE: todos
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  environment: ${self:custom.settings} # self means this file. With this line now use have access to custom variables
+  region: ap-southeast-1
+  # this defines the iam access for dynamoDb CRUD operations
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        # this defines the region in which we defined our db to have access
+      Resource: arn:aws:dynamodb:ap-southeast-1:*:*
+      # or define the resourse for a specific table using env variable as
+      # Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.TODOS_TABLE}
+
+# defining our dynamodb table creation
+resources:
+  Resources:
+    TodoTable:
+      Type: "AWS::DynamoDB::Table"
+      # this basically says don't delete our dynamoDB table everytime we build and deploy with serverless
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions: # defining DB attribute
+          - AttributeName: id
+            AttributeType: S
+        KeySchema: # defining primary key for DB
+          - AttributeName: id
+            KeyType: HASH # specifies that id is partition key
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: "todos"
+
+# this also creates api gateway trigger to invoke the function
+functions:
+  create:
+    handler: src/handler/createTodo.createTodo # first createTodo is the file name and second one is the exported function name inside of it
+    events:
+      - http:
+          path: todos
+          method: post
+          cors: true
+  list:
+    handler: src/handler/listTodo.listTodo
+    events:
+      - http:
+          path: todos
+          method: get
+          cors: true
+  get:
+    handler: src/handler/getTodo.getTodo
+    events:
+      - http:
+          path: todos/{id}
+          method: get
+          cors: true
+  update:
+    handler: src/handler/updateTodo.updateTodo
+    events:
+      - http:
+          path: todos/{id}
+          method: put
+          cors: true
+  delete:
+    handler: src/handler/deleteTodo.deleteTodo
+    events:
+      - http:
+          path: todos/{id}
+          method: delete
+          cors: true
